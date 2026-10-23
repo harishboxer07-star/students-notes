@@ -1,0 +1,19 @@
+{
+  "name": "LAK04 — Student Notes Hub",
+  "short_name": "LAK04",
+  "description": "Student Notes and Academic Subject Management System",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B192C",
+  "theme_color": "#0B192C",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/static/img/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

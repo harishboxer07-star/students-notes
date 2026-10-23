@@ -47,11 +47,14 @@
                             <i class="fa-solid fa-barcode"></i> Resource URN: <strong>{{ note.pdf_url }}</strong>
                         </span>
                     {% else %}
-                        <a href="{{ note.pdf_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-pdf-primary">
-                            <i class="fa-solid fa-file-pdf"></i> View / Read PDF
+                        <button type="button" class="btn btn-pdf-primary" onclick="openInAppPdfViewer('{{ note.pdf_url }}', '{{ note.title }}')">
+                            <i class="fa-solid fa-file-pdf"></i> Read In-App PDF
+                        </button>
+                        <a href="{{ note.pdf_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-pdf-secondary" title="Open PDF in new tab">
+                            <i class="fa-solid fa-up-right-from-square"></i> New Tab
                         </a>
-                        <a href="{{ note.pdf_url }}" download class="btn btn-pdf-secondary">
-                            <i class="fa-solid fa-download"></i> Download PDF
+                        <a href="{{ note.pdf_url }}" download class="btn btn-pdf-secondary" title="Download to device">
+                            <i class="fa-solid fa-download"></i> Download
                         </a>
                     {% endif %}
                 </div>
@@ -188,4 +191,30 @@
         </div>
     </div>
 </section>
+
+<!-- In-App Interactive PDF Reader Modal (Mobile & Desktop) -->
+<div class="in-app-pdf-modal" id="in-app-pdf-modal" style="display: none;">
+    <div class="pdf-modal-header">
+        <div class="pdf-modal-info">
+            <span class="pdf-badge-modal"><i class="fa-solid fa-file-pdf"></i> PDF Reader</span>
+            <h3 class="pdf-modal-title" id="pdf-modal-title">{{ note.title }}</h3>
+        </div>
+        <div class="pdf-modal-actions">
+            {% if note.pdf_url %}
+                <a href="{{ note.pdf_url }}" download class="btn btn-sm btn-outline-light" title="Download PDF to device">
+                    <i class="fa-solid fa-download"></i> <span class="hide-on-small">Download</span>
+                </a>
+                <a href="{{ note.pdf_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-light" title="Open PDF in browser tab">
+                    <i class="fa-solid fa-up-right-from-square"></i> <span class="hide-on-small">New Tab</span>
+                </a>
+            {% endif %}
+            <button type="button" class="btn-close-pdf" onclick="closeInAppPdfViewer()" aria-label="Close PDF Viewer" title="Close Reader">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    </div>
+    <div class="pdf-modal-body">
+        <iframe id="pdf-viewer-frame" src="" frameborder="0" allowfullscreen></iframe>
+    </div>
+</div>
 {% endblock %}

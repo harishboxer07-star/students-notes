@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0B192C"/>
+      <stop offset="50%" stop-color="#1E3E62"/>
+      <stop offset="100%" stop-color="#00ADB5"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)"/>
+  <g filter="url(#shadow)" fill="#FFFFFF" transform="translate(64, 80) scale(0.75)">
+    <!-- Graduation Cap Icon -->
+    <path d="M256 32L32 144l224 112 192-96v112h32V144L256 32z"/>
+    <path d="M112 240v96c0 64 64 112 144 112s144-48 144-112v-96l-144 72-144-72z" opacity="0.95"/>
+    <path d="M448 176v160l-32-16v-128l32-16z" fill="#00ADB5"/>
+  </g>
+  <text x="256" y="440" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="52" font-weight="800" fill="#FFFFFF" text-anchor="middle" letter-spacing="4">LAK04</text>
+</svg>

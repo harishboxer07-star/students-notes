@@ -7,6 +7,16 @@
     <title>{% block title %}LAK04 — Student Notes & Subject Management Hub{% endblock %}</title>
     <meta name="description" content="{% block meta_description %}LAK04 is a clean, organized educational notes and subject management system for students and educators.{% endblock %}">
     
+    <!-- PWA & Mobile App Meta Tags -->
+    <meta name="theme-color" content="#0B192C">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="LAK04">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/icon.svg') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/icon.svg') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+
     <!-- Google Fonts: Plus Jakarta Sans & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -59,6 +69,16 @@
                 </ul>
 
                 <div class="nav-actions">
+                    <!-- Quick Install App Button (Visible when PWA installable) -->
+                    <button type="button" class="btn btn-outline-light btn-sm pwa-nav-btn" id="nav-install-btn" style="display: none;" title="Install LAK04 on device">
+                        <i class="fa-solid fa-mobile-screen-button"></i> Install App
+                    </button>
+
+                    <!-- Theme Toggle (Dark / Light) -->
+                    <button type="button" class="btn-theme-toggle" id="theme-toggle-btn" title="Toggle Light/Dark Theme" aria-label="Toggle theme">
+                        <i class="fa-solid fa-moon" id="theme-toggle-icon"></i>
+                    </button>
+
                     {% if is_admin_logged_in %}
                         <div class="admin-pill-group">
                             <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-primary btn-sm">
@@ -77,6 +97,23 @@
             </nav>
         </div>
     </header>
+
+    <!-- Progressive Web App Install Banner (Mobile & Desktop) -->
+    <div class="pwa-install-banner" id="pwa-install-banner" style="display: none;">
+        <div class="pwa-banner-left">
+            <span class="pwa-icon"><i class="fa-solid fa-graduation-cap"></i></span>
+            <div class="pwa-info">
+                <strong>Install LAK04 Notes App</strong>
+                <p>One-tap access, offline notes cache, and distraction-free learning</p>
+            </div>
+        </div>
+        <div class="pwa-banner-actions">
+            <button type="button" class="btn btn-primary btn-sm" id="pwa-install-btn">
+                <i class="fa-solid fa-download"></i> Install
+            </button>
+            <button type="button" class="pwa-dismiss-btn" id="pwa-dismiss-btn" title="Dismiss">&times;</button>
+        </div>
+    </div>
 
     <!-- Global Toast / Alert Notifications -->
     <div class="flash-container" id="flash-alerts-container">
@@ -173,6 +210,38 @@
             </div>
         </div>
     </footer>
+
+    <!-- Mobile Bottom App Bar (One-Thumb Navigation) -->
+    <nav class="mobile-bottom-app-bar" id="mobile-app-bar" aria-label="Mobile Navigation">
+        <a href="{{ url_for('index') }}" class="app-bar-item {% if request.endpoint == 'index' %}active{% endif %}">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </a>
+        <a href="{{ url_for('subjects_list') }}" class="app-bar-item {% if request.endpoint in ['subjects_list', 'subject_detail'] %}active{% endif %}">
+            <i class="fa-solid fa-layer-group"></i>
+            <span>Subjects</span>
+        </a>
+        <a href="{{ url_for('notes_list') }}" class="app-bar-item {% if request.endpoint in ['notes_list', 'note_detail'] %}active{% endif %}">
+            <i class="fa-solid fa-book-open"></i>
+            <span>Notes</span>
+        </a>
+        {% if is_admin_logged_in %}
+            <a href="{{ url_for('admin_dashboard') }}" class="app-bar-item {% if 'admin' in (request.endpoint or '') %}active{% endif %}">
+                <i class="fa-solid fa-gauge-high"></i>
+                <span>Admin</span>
+            </a>
+        {% else %}
+            <a href="{{ url_for('admin_login') }}" class="app-bar-item {% if request.endpoint == 'admin_login' %}active{% endif %}">
+                <i class="fa-solid fa-lock"></i>
+                <span>Login</span>
+            </a>
+        {% endif %}
+    </nav>
+
+    <!-- Floating Back to Top Button -->
+    <button type="button" class="back-to-top-btn" id="back-to-top-btn" title="Back to top" aria-label="Back to top">
+        <i class="fa-solid fa-chevron-up"></i>
+    </button>
 
     <!-- JavaScript -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
