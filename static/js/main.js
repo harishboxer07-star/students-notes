@@ -34,52 +34,13 @@ window.closeInAppPdfViewer = function() {
 
 document.addEventListener('DOMContentLoaded', () => {
     // ---------------------------------------------------------
-    // 1. Dark / Light Theme Engine
+    // 1. Reset Theme to Clean Default Light Mode
     // ---------------------------------------------------------
-    const themeToggleBtn = document.getElementById('theme-toggle-btn');
-    const themeToggleIcon = document.getElementById('theme-toggle-icon');
-
-    function getSystemTheme() {
-        const saved = localStorage.getItem('lak04-theme');
-        if (saved === 'dark' || saved === 'light') return saved;
-        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-
-    function applyTheme(theme) {
-        document.documentElement.setAttribute('data-theme', theme);
-        document.body.setAttribute('data-theme', theme);
-        localStorage.setItem('lak04-theme', theme);
-
-        if (themeToggleIcon) {
-            if (theme === 'dark') {
-                themeToggleIcon.className = 'fa-solid fa-sun';
-                if (themeToggleBtn) themeToggleBtn.setAttribute('title', 'Switch to Light Mode');
-            } else {
-                themeToggleIcon.className = 'fa-solid fa-moon';
-                if (themeToggleBtn) themeToggleBtn.setAttribute('title', 'Switch to Dark Mode');
-            }
-        }
-    }
-
-    // Apply initial theme immediately
-    applyTheme(getSystemTheme());
-
-    if (themeToggleBtn) {
-        themeToggleBtn.addEventListener('click', () => {
-            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            applyTheme(newTheme);
-        });
-    }
-
-    // Listen for OS theme changes if user hasn't explicitly set a preference
-    if (window.matchMedia) {
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-            if (!localStorage.getItem('lak04-theme')) {
-                applyTheme(e.matches ? 'dark' : 'light');
-            }
-        });
-    }
+    try {
+        localStorage.removeItem('lak04-theme');
+        document.documentElement.removeAttribute('data-theme');
+        document.body.removeAttribute('data-theme');
+    } catch (e) {}
 
     // ---------------------------------------------------------
     // 2. Mobile Navigation Drawer Toggle
