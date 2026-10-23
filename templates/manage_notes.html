@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Notes — LAK04 Admin{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+    <!-- Admin Sidebar -->
+    <aside class="admin-sidebar" id="admin-sidebar">
+        <div class="sidebar-brand">
+            <span class="sidebar-brand-icon"><i class="fa-solid fa-gauge-high"></i></span>
+            <div class="sidebar-brand-info">
+                <span class="sidebar-title">Admin Console</span>
+                <span class="sidebar-user"><i class="fa-solid fa-circle text-success"></i> {{ admin_username }}</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="sidebar-section-title">Navigation</div>
+            <ul class="sidebar-menu">
+                <li class="sidebar-item">
+                    <a href="{{ url_for('admin_dashboard') }}" class="sidebar-link">
+                        <i class="fa-solid fa-chart-pie"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ url_for('manage_subjects') }}" class="sidebar-link">
+                        <i class="fa-solid fa-layer-group"></i>
+                        <span>Manage Subjects</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ url_for('manage_notes') }}" class="sidebar-link active">
+                        <i class="fa-solid fa-book-open"></i>
+                        <span>Manage Notes</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-section-title">Actions & Links</div>
+            <ul class="sidebar-menu">
+                <li class="sidebar-item">
+                    <a href="{{ url_for('index') }}" class="sidebar-link" target="_blank">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        <span>View Website</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ url_for('admin_logout') }}" class="sidebar-link text-danger">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Sign Out</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="admin-main-content">
+        <!-- Top Title Bar -->
+        <div class="admin-topbar">
+            <div>
+                <div class="breadcrumbs admin-breadcrumbs">
+                    <a href="{{ url_for('admin_dashboard') }}">Admin</a>
+                    <i class="fa-solid fa-chevron-right separator"></i>
+                    <span>Notes</span>
+                </div>
+                <h1 class="admin-page-title">Manage Study Notes</h1>
+                <p class="admin-page-subtitle">Publish, revise, format, and organize academic student notes.</p>
+            </div>
+            <div>
+                <a href="{{ url_for('note_create') }}" class="btn btn-primary">
+                    <i class="fa-solid fa-plus"></i> Add New Note
+                </a>
+            </div>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="admin-toolbar-card">
+            <form action="{{ url_for('manage_notes') }}" method="GET" class="admin-search-form notes-admin-filter">
+                <div class="filter-input-group">
+                    <i class="fa-solid fa-magnifying-glass filter-icon"></i>
+                    <input 
+                        type="text" 
+                        name="search" 
+                        value="{{ search }}" 
+                        placeholder="Search notes by title or content..."
+                    >
+                    {% if search %}
+                        <a href="{{ url_for('manage_notes', subject_id=selected_subject_id or '') }}" class="clear-search-btn" title="Clear search">
+                            <i class="fa-solid fa-xmark"></i>
+                        </a>
+                    {% endif %}
+                </div>
+
+                <div class="filter-input-group select-group">
+                    <i class="fa-solid fa-filter filter-icon"></i>
+                    <select name="subject_id" onchange="this.form.submit()">
+                        <option value="">All Subjects</option>
+                        {% for sub in subjects %}
+                            <option value="{{ sub.id }}" {% if selected_subject_id == sub.id %}selected{% endif %}>
+                                {{ sub.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-secondary btn-sm">Filter</button>
+
+                {% if search or selected_subject_id %}
+                    <a href="{{ url_for('manage_notes') }}" class="btn btn-outline-secondary btn-sm" title="Reset all filters">
+                        Reset
+                    </a>
+                {% endif %}
+            </form>
+            <div class="toolbar-stats">
+                <span>Showing: <strong>{{ notes|length }}</strong> notes</span>
+            </div>
+        </div>
+
+        <!-- Notes Table Card -->
+        <div class="admin-panel-card">
+            <div class="panel-card-body table-responsive">
+                {% if notes %}
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">ID</th>
+                                <th>Note Title</th>
+                                <th style="width: 170px;">Subject</th>
+                                <th style="width: 90px;">PDF</th>
+                                <th style="width: 120px;">Created</th>
+                                <th class="text-right" style="width: 150px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for note in notes %}
+                                <tr>
+                                    <td><span class="table-id">#{{ note.id }}</span></td>
+                                    <td>
+                                        <a href="{{ url_for('note_detail', note_id=note.id) }}" target="_blank" class="table-item-title" title="Open student view">
+                                            <strong>{{ note.title }}</strong>
+                                        </a>
+                                        {% if note.description %}
+                                            <p class="table-description-text">{{ note.description[:110] }}{% if note.description|length > 110 %}...{% endif %}</p>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge-tag"><i class="fa-solid fa-tag"></i> {{ note.subject_name }}</span>
+                                    </td>
+                                    <td>
+                                        {% if note.pdf_url %}
+                                            <a href="{{ note.pdf_url }}" target="_blank" rel="noopener noreferrer" class="badge-mini-pdf" title="View attached PDF">
+                                                <i class="fa-solid fa-file-pdf"></i> Attached
+                                            </a>
+                                        {% else %}
+                                            <span class="badge-none-pdf">None</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="table-date">{{ note.created_at|format_date }}</span>
+                                    </td>
+                                    <td class="text-right">
+                                        <div class="table-actions">
+                                            <a href="{{ url_for('note_detail', note_id=note.id) }}" class="btn-icon" title="View Public Note" target="_blank">
+                                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                            </a>
+                                            <a href="{{ url_for('note_edit', note_id=note.id) }}" class="btn-icon text-primary" title="Edit Note">
+                                                <i class="fa-solid fa-pen-to-square"></i>
+                                            </a>
+                                            <button 
+                                                type="button" 
+                                                class="btn-icon text-danger" 
+                                                title="Delete Note"
+                                                data-id="{{ note.id }}"
+                                                data-title="{{ note.title }}"
+                                                data-url="{{ url_for('note_delete', note_id=note.id) }}"
+                                                onclick="openDeleteNoteModal(this)"
+                                            >
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="table-empty-notice">
+                        <i class="fa-regular fa-file-lines"></i>
+                        <h3>No Notes Found</h3>
+                        {% if search or selected_subject_id %}
+                            <p>No notes matched your search query or subject filter.</p>
+                            <a href="{{ url_for('manage_notes') }}" class="btn btn-secondary btn-sm">Clear Filters</a>
+                        {% else %}
+                            <p>You have not published any student notes yet.</p>
+                            <a href="{{ url_for('note_create') }}" class="btn btn-primary btn-sm">Create First Note</a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Dialog: Delete Note Confirmation -->
+<div class="modal-backdrop" id="delete-note-modal" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title-danger">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>Confirm Note Deletion</span>
+                </div>
+                <button type="button" class="modal-close" onclick="closeDeleteModal('delete-note-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to permanently delete note <strong id="modal-note-title"></strong>?</p>
+                <p class="modal-subtext">Students will immediately lose access to this note and its contents.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeDeleteModal('delete-note-modal')">Cancel</button>
+                <form id="delete-note-form" method="POST" action="">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fa-solid fa-trash-can"></i> Delete Permanently
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function openDeleteNoteModal(button) {
+    const noteTitle = button.getAttribute('data-title');
+    const deleteUrl = button.getAttribute('data-url');
+
+    document.getElementById('modal-note-title').innerText = `"${noteTitle}"`;
+    document.getElementById('delete-note-form').action = deleteUrl;
+    document.getElementById('delete-note-modal').style.display = 'flex';
+}
+
+function closeDeleteModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+</script>
+{% endblock %}

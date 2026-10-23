@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Browse All Study Notes — LAK04{% endblock %}
+{% block meta_description %}Search and filter study notes, summaries, and downloadable lecture notes across all subjects on LAK04.{% endblock %}
+
+{% block content %}
+<div class="page-header-banner">
+    <div class="content-container">
+        <div class="breadcrumbs">
+            <a href="{{ url_for('index') }}"><i class="fa-solid fa-house"></i> Home</a>
+            <i class="fa-solid fa-chevron-right separator"></i>
+            <span>Notes Repository</span>
+        </div>
+        <h1 class="page-title"><i class="fa-solid fa-book-open text-accent"></i> Study Notes Directory</h1>
+        <p class="page-subtitle">Search notes by keyword or filter by your subject of study for targeted exam revision.</p>
+    </div>
+</div>
+
+<section class="section-padding">
+    <div class="content-container">
+        <!-- Search and Subject Filter Form -->
+        <div class="filter-bar notes-filter-bar">
+            <form action="{{ url_for('notes_list') }}" method="GET" class="notes-filter-form" id="notes-filter-form">
+                <!-- Search Keyword -->
+                <div class="filter-input-group search-group">
+                    <i class="fa-solid fa-magnifying-glass filter-icon"></i>
+                    <input 
+                        type="text" 
+                        name="search" 
+                        value="{{ search }}" 
+                        placeholder="Search notes by title, topic, or keyword..."
+                        id="notes-search-input"
+                    >
+                    {% if search %}
+                        <a href="{{ url_for('notes_list', subject_id=selected_subject_id or '') }}" class="clear-search-btn" title="Clear keyword search">
+                            <i class="fa-solid fa-xmark"></i>
+                        </a>
+                    {% endif %}
+                </div>
+
+                <!-- Subject Select Dropdown -->
+                <div class="filter-input-group select-group">
+                    <i class="fa-solid fa-layer-group filter-icon"></i>
+                    <select name="subject_id" id="subject-filter-select" onchange="this.form.submit()">
+                        <option value="">All Subjects ({{ subjects|length }})</option>
+                        {% for sub in subjects %}
+                            <option value="{{ sub.id }}" {% if selected_subject_id == sub.id %}selected{% endif %}>
+                                {{ sub.name }} ({{ sub.notes_count }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Action Button -->
+                <button type="submit" class="btn btn-primary filter-submit-btn">
+                    <i class="fa-solid fa-filter"></i> Apply Filters
+                </button>
+
+                {% if search or selected_subject_id %}
+                    <a href="{{ url_for('notes_list') }}" class="btn btn-outline-secondary reset-filters-btn" title="Reset all filters">
+                        <i class="fa-solid fa-rotate-left"></i> Reset
+                    </a>
+                {% endif %}
+            </form>
+
+            <div class="catalog-summary">
+                <span>Found <strong>{{ notes|length }}</strong> {{ 'note' if notes|length == 1 else 'notes' }}</span>
+                {% if selected_subject %}
+                    <span class="active-filter-badge">
+                        Filtered by: <strong>{{ selected_subject.name }}</strong>
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Notes Grid Display -->
+        {% if notes %}
+            <div class="notes-grid">
+                {% for note in notes %}
+                    <article class="note-card">
+                        <div class="note-card-header">
+                            <a href="{{ url_for('notes_list', subject_id=note.subject_id) }}" class="subject-tag" title="Filter by {{ note.subject_name }}">
+                                <i class="fa-solid fa-tag"></i> {{ note.subject_name }}
+                            </a>
+                            <span class="note-date">
+                                <i class="fa-regular fa-calendar"></i> {{ note.created_at|format_date }}
+                            </span>
+                        </div>
+                        <div class="note-card-body">
+                            <h3 class="note-title">
+                                <a href="{{ url_for('note_detail', note_id=note.id) }}">{{ note.title }}</a>
+                            </h3>
+                            <p class="note-snippet">
+                                {{ note.description or (note.content[:140] ~ '...') }}
+                            </p>
+                        </div>
+                        <div class="note-card-footer">
+                            <a href="{{ url_for('note_detail', note_id=note.id) }}" class="btn btn-primary btn-sm">
+                                <i class="fa-solid fa-eye"></i> View Details
+                            </a>
+                            {% if note.pdf_url %}
+                                <a href="{{ note.pdf_url }}" target="_blank" rel="noopener noreferrer" class="pdf-indicator" title="View PDF Document">
+                                    <i class="fa-solid fa-file-pdf"></i> View PDF
+                                </a>
+                            {% endif %}
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state-box">
+                <i class="fa-regular fa-file-lines empty-icon"></i>
+                <h3>No Notes Found</h3>
+                {% if search or selected_subject_id %}
+                    <p>No study notes matched your filter criteria.</p>
+                    <div class="empty-state-actions">
+                        <a href="{{ url_for('notes_list') }}" class="btn btn-primary">
+                            <i class="fa-solid fa-rotate-left"></i> Reset Filters & View All
+                        </a>
+                    </div>
+                {% else %}
+                    <p>There are currently no notes published in the system.</p>
+                    {% if is_admin_logged_in %}
+                        <div class="empty-state-actions">
+                            <a href="{{ url_for('note_create') }}" class="btn btn-primary">
+                                <i class="fa-solid fa-plus"></i> Create First Note
+                            </a>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

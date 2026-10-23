@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}{{ note.title }} — LAK04 Study Notes{% endblock %}
+{% block meta_description %}{{ note.description or note.title }}{% endblock %}
+
+{% block content %}
+<!-- Reading Header -->
+<div class="reading-header-banner">
+    <div class="content-container">
+        <div class="breadcrumbs">
+            <a href="{{ url_for('index') }}"><i class="fa-solid fa-house"></i> Home</a>
+            <i class="fa-solid fa-chevron-right separator"></i>
+            <a href="{{ url_for('notes_list') }}">Notes</a>
+            <i class="fa-solid fa-chevron-right separator"></i>
+            <a href="{{ url_for('notes_list', subject_id=note.subject_id) }}">{{ note.subject_name }}</a>
+        </div>
+
+        <div class="note-meta-top">
+            <a href="{{ url_for('notes_list', subject_id=note.subject_id) }}" class="subject-pill-badge">
+                <i class="fa-solid fa-tag"></i> {{ note.subject_name }}
+            </a>
+            <span class="meta-date">
+                <i class="fa-regular fa-calendar-check"></i> Published: {{ note.created_at|format_date }}
+            </span>
+            {% if note.updated_at and note.updated_at != note.created_at %}
+                <span class="meta-date">
+                    <i class="fa-solid fa-arrows-rotate"></i> Updated: {{ note.updated_at|format_date }}
+                </span>
+            {% endif %}
+        </div>
+
+        <h1 class="reading-title">{{ note.title }}</h1>
+
+        {% if note.description %}
+            <p class="reading-summary-lead">
+                <i class="fa-solid fa-quote-left quote-icon"></i>
+                {{ note.description }}
+            </p>
+        {% endif %}
+
+        <!-- Quick Toolbar -->
+        <div class="reading-toolbar">
+            {% if note.pdf_url %}
+                <div class="pdf-action-group">
+                    {% if note.pdf_url.startswith('urn:') %}
+                        <span class="btn btn-pdf-secondary" title="Universal Resource Name">
+                            <i class="fa-solid fa-barcode"></i> Resource URN: <strong>{{ note.pdf_url }}</strong>
+                        </span>
+                    {% else %}
+                        <a href="{{ note.pdf_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-pdf-primary">
+                            <i class="fa-solid fa-file-pdf"></i> View / Read PDF
+                        </a>
+                        <a href="{{ note.pdf_url }}" download class="btn btn-pdf-secondary">
+                            <i class="fa-solid fa-download"></i> Download PDF
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            <div class="action-buttons-right">
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="window.print()" title="Print this note">
+                    <i class="fa-solid fa-print"></i> Print Note
+                </button>
+                {% if is_admin_logged_in %}
+                    <a href="{{ url_for('note_edit', note_id=note.id) }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fa-solid fa-pen-to-square"></i> Edit Note (Admin)
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Note Content Layout -->
+<section class="section-padding reading-body-section">
+    <div class="content-container reading-container">
+        <div class="reading-grid">
+            <!-- Article Body -->
+            <article class="reading-article-card">
+                <div class="reading-card-inner">
+                    {% if note.content and note.content.strip() and (note.content.strip() != note.description.strip()) and (note.content.strip() != note.title.strip()) %}
+                        <div class="content-render" id="note-rendered-content">
+                            {# Format content: preserve paragraphs and format markdown-like headers #}
+                            {% for paragraph in note.content.split('\n\n') %}
+                                {% set trimmed_p = paragraph.strip() %}
+                                {% if trimmed_p.startswith('### ') %}
+                                    <h3>{{ trimmed_p[4:] }}</h3>
+                                {% elif trimmed_p.startswith('## ') %}
+                                    <h2>{{ trimmed_p[3:] }}</h2>
+                                {% elif trimmed_p.startswith('# ') %}
+                                    <h1>{{ trimmed_p[2:] }}</h1>
+                                {% elif trimmed_p.startswith('- ') or trimmed_p.startswith('* ') %}
+                                    <ul class="content-bullet-list">
+                                        {% for line in trimmed_p.split('\n') %}
+                                            {% if line.strip().startswith('- ') %}
+                                                <li>{{ line.strip()[2:] }}</li>
+                                            {% elif line.strip().startswith('* ') %}
+                                                <li>{{ line.strip()[2:] }}</li>
+                                            {% else %}
+                                                <li>{{ line.strip() }}</li>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </ul>
+                                {% elif trimmed_p.startswith('1. ') or trimmed_p.startswith('2. ') %}
+                                    <ol class="content-numbered-list">
+                                        {% for line in trimmed_p.split('\n') %}
+                                            <li>{{ line.strip().split('. ', 1)[-1] }}</li>
+                                        {% endfor %}
+                                    </ol>
+                                {% else %}
+                                    <p>{{ trimmed_p|replace('\n', '<br>')|safe }}</p>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    {% if note.pdf_url %}
+                        <div class="pdf-callout-card">
+                            <div class="pdf-callout-icon">
+                                <i class="fa-solid {% if note.pdf_url.startswith('urn:') %}fa-barcode{% else %}fa-file-pdf{% endif %}"></i>
+                            </div>
+                            <div class="pdf-callout-info">
+                                <h4>{% if note.pdf_url.startswith('urn:') %}Supplementary Academic Resource URN{% else %}Supplementary PDF Document Attached{% endif %}</h4>
+                                <p>{% if note.pdf_url.startswith('urn:') %}This study note references a standardized URN catalog resource.{% else %}This study note includes an official lecture or textbook reference PDF for deeper study.{% endif %}</p>
+                                <span class="pdf-url-display">{{ note.pdf_url }}</span>
+                            </div>
+                            <div class="pdf-callout-actions">
+                                {% if note.pdf_url.startswith('urn:') %}
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="navigator.clipboard.writeText('{{ note.pdf_url }}'); this.innerText='Copied URN!';">
+                                        <i class="fa-regular fa-copy"></i> Copy URN
+                                    </button>
+                                {% else %}
+                                    <a href="{{ note.pdf_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">
+                                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Open in New Tab
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="reading-article-footer">
+                    <a href="{{ url_for('notes_list', subject_id=note.subject_id) }}" class="btn btn-secondary">
+                        <i class="fa-solid fa-arrow-left"></i> Back to {{ note.subject_name }} Notes
+                    </a>
+                    <a href="{{ url_for('notes_list') }}" class="btn btn-outline-secondary">
+                        <i class="fa-solid fa-book-open"></i> All Notes Directory
+                    </a>
+                </div>
+            </article>
+
+            <!-- Sidebar Info & Related Notes -->
+            <aside class="reading-sidebar">
+                <div class="sidebar-widget note-details-widget">
+                    <h3 class="widget-title"><i class="fa-solid fa-circle-info"></i> Note Details</h3>
+                    <ul class="widget-meta-list">
+                        <li>
+                            <span class="meta-label">Subject</span>
+                            <span class="meta-value">
+                                <a href="{{ url_for('subject_detail', subject_id=note.subject_id) }}">{{ note.subject_name }}</a>
+                            </span>
+                        </li>
+                        <li>
+                            <span class="meta-label">Published On</span>
+                            <span class="meta-value">{{ note.created_at|format_date }}</span>
+                        </li>
+                        <li>
+                            <span class="meta-label">Resource Type</span>
+                            <span class="meta-value">Text {% if note.pdf_url %}+ PDF{% endif %}</span>
+                        </li>
+                    </ul>
+                </div>
+
+                {% if related_notes %}
+                    <div class="sidebar-widget related-notes-widget">
+                        <h3 class="widget-title"><i class="fa-solid fa-list-check"></i> More in this Subject</h3>
+                        <div class="related-notes-list">
+                            {% for rel in related_notes %}
+                                <a href="{{ url_for('note_detail', note_id=rel.id) }}" class="related-note-item">
+                                    <span class="rel-title">{{ rel.title }}</span>
+                                    <span class="rel-date"><i class="fa-regular fa-calendar"></i> {{ rel.created_at|format_date }}</span>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </aside>
+        </div>
+    </div>
+</section>
+{% endblock %}

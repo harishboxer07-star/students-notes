@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard — LAK04{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+    <!-- Admin Sidebar -->
+    <aside class="admin-sidebar" id="admin-sidebar">
+        <div class="sidebar-brand">
+            <span class="sidebar-brand-icon"><i class="fa-solid fa-gauge-high"></i></span>
+            <div class="sidebar-brand-info">
+                <span class="sidebar-title">Admin Console</span>
+                <span class="sidebar-user"><i class="fa-solid fa-circle text-success"></i> {{ admin_username }}</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="sidebar-section-title">Navigation</div>
+            <ul class="sidebar-menu">
+                <li class="sidebar-item">
+                    <a href="{{ url_for('admin_dashboard') }}" class="sidebar-link active">
+                        <i class="fa-solid fa-chart-pie"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ url_for('manage_subjects') }}" class="sidebar-link">
+                        <i class="fa-solid fa-layer-group"></i>
+                        <span>Manage Subjects</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ url_for('manage_notes') }}" class="sidebar-link">
+                        <i class="fa-solid fa-book-open"></i>
+                        <span>Manage Notes</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-section-title">Actions & Links</div>
+            <ul class="sidebar-menu">
+                <li class="sidebar-item">
+                    <a href="{{ url_for('index') }}" class="sidebar-link" target="_blank">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        <span>View Website</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ url_for('admin_logout') }}" class="sidebar-link text-danger">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Sign Out</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Admin Main Body -->
+    <div class="admin-main-content">
+        <!-- Top Title Bar -->
+        <div class="admin-topbar">
+            <div>
+                <h1 class="admin-page-title">Executive Dashboard</h1>
+                <p class="admin-page-subtitle">Welcome back, <strong>{{ admin_username }}</strong>. Here is your overview of subjects and notes.</p>
+            </div>
+            <div class="admin-quick-buttons">
+                <a href="{{ url_for('subject_create') }}" class="btn btn-outline-primary btn-sm">
+                    <i class="fa-solid fa-folder-plus"></i> New Subject
+                </a>
+                <a href="{{ url_for('note_create') }}" class="btn btn-primary btn-sm">
+                    <i class="fa-solid fa-file-circle-plus"></i> Add Note
+                </a>
+            </div>
+        </div>
+
+        <!-- Metric Stat Cards -->
+        <div class="stats-overview-grid">
+            <div class="stat-card">
+                <div class="stat-card-icon stat-icon-navy">
+                    <i class="fa-solid fa-layer-group"></i>
+                </div>
+                <div class="stat-card-details">
+                    <span class="stat-card-label">Total Subjects</span>
+                    <h3 class="stat-card-value">{{ total_subjects }}</h3>
+                    <a href="{{ url_for('manage_subjects') }}" class="stat-card-link">
+                        Manage Subjects <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-icon stat-icon-blue">
+                    <i class="fa-solid fa-book-open"></i>
+                </div>
+                <div class="stat-card-details">
+                    <span class="stat-card-label">Total Study Notes</span>
+                    <h3 class="stat-card-value">{{ total_notes }}</h3>
+                    <a href="{{ url_for('manage_notes') }}" class="stat-card-link">
+                        Manage Notes <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-icon stat-icon-teal">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                </div>
+                <div class="stat-card-details">
+                    <span class="stat-card-label">Recently Added Notes</span>
+                    <h3 class="stat-card-value">{{ recent_notes|length }}</h3>
+                    <a href="{{ url_for('manage_notes') }}" class="stat-card-link">
+                        View Note History <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Content Grid -->
+        <div class="dashboard-tables-grid">
+            <!-- Recently Added Notes Table -->
+            <div class="admin-panel-card">
+                <div class="panel-card-header">
+                    <div>
+                        <h2 class="panel-card-title"><i class="fa-solid fa-file-lines text-primary"></i> Recently Added Notes</h2>
+                        <span class="panel-card-desc">Latest study notes published to students</span>
+                    </div>
+                    <a href="{{ url_for('note_create') }}" class="btn btn-primary btn-sm">
+                        <i class="fa-solid fa-plus"></i> New Note
+                    </a>
+                </div>
+                <div class="panel-card-body table-responsive">
+                    {% if recent_notes %}
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Subject</th>
+                                    <th>Date</th>
+                                    <th class="text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for note in recent_notes %}
+                                    <tr>
+                                        <td>
+                                            <a href="{{ url_for('note_detail', note_id=note.id) }}" class="table-item-title" target="_blank">
+                                                {{ note.title }}
+                                            </a>
+                                            {% if note.pdf_url %}
+                                                <span class="badge-mini-pdf" title="Has PDF Attachment"><i class="fa-solid fa-file-pdf"></i></span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge-tag">{{ note.subject_name }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="table-date">{{ note.created_at|format_date }}</span>
+                                        </td>
+                                        <td class="text-right">
+                                            <div class="table-actions">
+                                                <a href="{{ url_for('note_detail', note_id=note.id) }}" class="btn-icon" title="View Note" target="_blank">
+                                                    <i class="fa-solid fa-eye"></i>
+                                                </a>
+                                                <a href="{{ url_for('note_edit', note_id=note.id) }}" class="btn-icon" title="Edit Note">
+                                                    <i class="fa-solid fa-pen-to-square"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="table-empty-notice">
+                            <i class="fa-regular fa-folder-open"></i>
+                            <p>No study notes created yet.</p>
+                            <a href="{{ url_for('note_create') }}" class="btn btn-primary btn-sm">Add First Note</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Subject Overview Panel -->
+            <div class="admin-panel-card">
+                <div class="panel-card-header">
+                    <div>
+                        <h2 class="panel-card-title"><i class="fa-solid fa-layer-group text-accent"></i> Subject Distribution</h2>
+                        <span class="panel-card-desc">Quick look at current academic subjects</span>
+                    </div>
+                    <a href="{{ url_for('subject_create') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fa-solid fa-plus"></i> New Subject
+                    </a>
+                </div>
+                <div class="panel-card-body">
+                    {% if subjects %}
+                        <div class="dashboard-subjects-list">
+                            {% for sub in subjects %}
+                                <div class="dashboard-subject-item">
+                                    <div class="sub-item-info">
+                                        <h4 class="sub-item-title">{{ sub.name }}</h4>
+                                        <span class="sub-item-count"><i class="fa-solid fa-file-lines"></i> {{ sub.notes_count }} notes</span>
+                                    </div>
+                                    <div class="sub-item-actions">
+                                        <a href="{{ url_for('subject_edit', subject_id=sub.id) }}" class="btn-icon" title="Edit Subject">
+                                            <i class="fa-solid fa-pencil"></i>
+                                        </a>
+                                        <a href="{{ url_for('subject_detail', subject_id=sub.id) }}" class="btn-icon" title="View Subject Notes" target="_blank">
+                                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="table-empty-notice">
+                            <i class="fa-solid fa-layer-group"></i>
+                            <p>No subjects registered yet.</p>
+                            <a href="{{ url_for('subject_create') }}" class="btn btn-primary btn-sm">Create First Subject</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

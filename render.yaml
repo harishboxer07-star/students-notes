@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: lak04-student-notes
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt && python init_admin.py --username admin --password admin123 --seed
+    startCommand: gunicorn wsgi:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: SECRET_KEY
+        generateValue: true

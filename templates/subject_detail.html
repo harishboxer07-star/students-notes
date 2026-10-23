@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}{{ subject.name }} Notes — LAK04{% endblock %}
+{% block meta_description %}Read notes and lecture summaries for {{ subject.name }} on LAK04.{% endblock %}
+
+{% block content %}
+<div class="page-header-banner">
+    <div class="content-container">
+        <div class="breadcrumbs">
+            <a href="{{ url_for('index') }}"><i class="fa-solid fa-house"></i> Home</a>
+            <i class="fa-solid fa-chevron-right separator"></i>
+            <a href="{{ url_for('subjects_list') }}">Subjects</a>
+            <i class="fa-solid fa-chevron-right separator"></i>
+            <span>{{ subject.name }}</span>
+        </div>
+        <div class="subject-header-info">
+            <div class="subject-badge-pill">
+                <i class="fa-solid fa-folder-open"></i> Subject Portal
+            </div>
+            <h1 class="page-title">{{ subject.name }}</h1>
+            <p class="page-subtitle">
+                {{ subject.description or 'Study materials and reference notes curated for this subject.' }}
+            </p>
+            <div class="header-meta-tags">
+                <span class="meta-tag"><i class="fa-solid fa-file-lines"></i> {{ notes|length }} Total Notes</span>
+                <span class="meta-tag"><i class="fa-regular fa-clock"></i> Updated Regularly</span>
+                {% if is_admin_logged_in %}
+                    <a href="{{ url_for('note_create') }}?subject_id={{ subject.id }}" class="btn btn-sm btn-outline-light">
+                        <i class="fa-solid fa-plus"></i> Add Note to this Subject
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="section-padding">
+    <div class="content-container">
+        <div class="section-header">
+            <div>
+                <span class="section-subtitle">Syllabus Index</span>
+                <h2 class="section-title">Available Notes for {{ subject.name }}</h2>
+            </div>
+            <a href="{{ url_for('subjects_list') }}" class="view-all-link">
+                <i class="fa-solid fa-arrow-left"></i> All Subjects
+            </a>
+        </div>
+
+        {% if notes %}
+            <div class="notes-grid">
+                {% for note in notes %}
+                    <article class="note-card">
+                        <div class="note-card-header">
+                            <span class="subject-tag">
+                                <i class="fa-solid fa-tag"></i> {{ subject.name }}
+                            </span>
+                            <span class="note-date">
+                                <i class="fa-regular fa-calendar"></i> {{ note.created_at|format_date }}
+                            </span>
+                        </div>
+                        <div class="note-card-body">
+                            <h3 class="note-title">
+                                <a href="{{ url_for('note_detail', note_id=note.id) }}">{{ note.title }}</a>
+                            </h3>
+                            <p class="note-snippet">
+                                {{ note.description or (note.content[:140] ~ '...') }}
+                            </p>
+                        </div>
+                        <div class="note-card-footer">
+                            <a href="{{ url_for('note_detail', note_id=note.id) }}" class="btn btn-outline-primary btn-sm">
+                                <i class="fa-solid fa-book-reader"></i> View Details
+                            </a>
+                            {% if note.pdf_url %}
+                                <a href="{{ note.pdf_url }}" target="_blank" rel="noopener noreferrer" class="pdf-indicator" title="Download or View PDF">
+                                    <i class="fa-solid fa-file-pdf"></i> PDF Available
+                                </a>
+                            {% endif %}
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state-box">
+                <i class="fa-regular fa-folder-open empty-icon"></i>
+                <h3>No Notes Available in {{ subject.name }}</h3>
+                <p>Notes for this subject have not been uploaded yet. Please check back later or explore other subjects.</p>
+                <div class="empty-state-actions">
+                    <a href="{{ url_for('subjects_list') }}" class="btn btn-primary">
+                        <i class="fa-solid fa-layer-group"></i> Browse Other Subjects
+                    </a>
+                    {% if is_admin_logged_in %}
+                        <a href="{{ url_for('note_create') }}?subject_id={{ subject.id }}" class="btn btn-outline-primary">
+                            <i class="fa-solid fa-plus"></i> Create Note Now
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

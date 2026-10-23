@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}LAK04 — Your Learning Notes Hub{% endblock %}
+
+{% block content %}
+<!-- Hero Welcome Section -->
+<section class="hero-section">
+    <div class="hero-pattern-bg"></div>
+    <div class="content-container hero-container">
+        <div class="hero-content">
+            <span class="hero-tag">
+                <i class="fa-solid fa-graduation-cap"></i> Student Knowledge Base
+            </span>
+            <h1 class="hero-title">
+                Welcome to <span class="text-accent">LAK04</span> — Your Learning Notes Hub
+            </h1>
+            <p class="hero-subtitle">
+                A streamlined, distraction-free educational platform designed to organize and explore high-yield academic study notes, structured subject-wise for seamless revision.
+            </p>
+
+            <!-- Prominent Search Bar -->
+            <form action="{{ url_for('notes_list') }}" method="GET" class="hero-search-form" id="hero-search-form">
+                <div class="search-input-wrapper">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input 
+                        type="text" 
+                        name="search" 
+                        id="hero-search-input"
+                        placeholder="Search notes by title, topic, or keyword (e.g. Big-O, Normalization, Flexbox)..." 
+                        autocomplete="off"
+                        required
+                    >
+                    <button type="submit" class="btn btn-search" id="hero-search-submit">
+                        <span>Search Notes</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Quick Metrics Overview -->
+            <div class="hero-stats-row">
+                <div class="stat-item">
+                    <span class="stat-number">{{ total_subjects }}</span>
+                    <span class="stat-label">Academic Subjects</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-number">{{ total_notes }}</span>
+                    <span class="stat-label">Study Notes</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-number">100%</span>
+                    <span class="stat-label">Free & Accessible</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Available Subjects Showcase Section -->
+<section class="section-padding subjects-showcase-section">
+    <div class="content-container">
+        <div class="section-header">
+            <div>
+                <span class="section-subtitle">Curated Academic Catalog</span>
+                <h2 class="section-title">Explore by Subject</h2>
+            </div>
+            <a href="{{ url_for('subjects_list') }}" class="view-all-link">
+                View All Subjects <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+
+        {% if subjects %}
+            <div class="subjects-grid">
+                {% for subject in subjects %}
+                    <div class="subject-card">
+                        <div class="subject-card-body">
+                            <div class="subject-icon-header">
+                                <div class="subject-icon-badge">
+                                    <i class="fa-solid fa-folder-open"></i>
+                                </div>
+                                <span class="notes-count-badge">
+                                    <i class="fa-solid fa-file-lines"></i> {{ subject.notes_count }} {{ 'note' if subject.notes_count == 1 else 'notes' }}
+                                </span>
+                            </div>
+                            <h3 class="subject-name">
+                                <a href="{{ url_for('subject_detail', subject_id=subject.id) }}">{{ subject.name }}</a>
+                            </h3>
+                            <p class="subject-desc">
+                                {{ subject.description or 'Comprehensive syllabus notes and study guides for ' ~ subject.name ~ '.' }}
+                            </p>
+                        </div>
+                        <div class="subject-card-footer">
+                            <a href="{{ url_for('subject_detail', subject_id=subject.id) }}" class="subject-action-btn">
+                                <span>Browse {{ subject.name }} Notes</span>
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state-box">
+                <i class="fa-solid fa-folder-open empty-icon"></i>
+                <h3>No Subjects Available Yet</h3>
+                <p>The administrator has not added any subjects yet. Check back soon!</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Recently Added Notes Section -->
+<section class="section-padding notes-showcase-section">
+    <div class="content-container">
+        <div class="section-header">
+            <div>
+                <span class="section-subtitle">Fresh Learning Resources</span>
+                <h2 class="section-title">Recently Added Notes</h2>
+            </div>
+            <a href="{{ url_for('notes_list') }}" class="view-all-link">
+                View All Notes <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+
+        {% if recent_notes %}
+            <div class="notes-grid">
+                {% for note in recent_notes %}
+                    <article class="note-card">
+                        <div class="note-card-header">
+                            <span class="subject-tag">
+                                <i class="fa-solid fa-tag"></i> {{ note.subject_name }}
+                            </span>
+                            <span class="note-date">
+                                <i class="fa-regular fa-calendar"></i> {{ note.created_at|format_date }}
+                            </span>
+                        </div>
+                        <div class="note-card-body">
+                            <h3 class="note-title">
+                                <a href="{{ url_for('note_detail', note_id=note.id) }}">{{ note.title }}</a>
+                            </h3>
+                            <p class="note-snippet">
+                                {{ note.description or (note.content[:140] ~ '...') }}
+                            </p>
+                        </div>
+                        <div class="note-card-footer">
+                            <a href="{{ url_for('note_detail', note_id=note.id) }}" class="btn btn-outline-primary btn-sm">
+                                <i class="fa-solid fa-book-reader"></i> Read Note
+                            </a>
+                            {% if note.pdf_url %}
+                                <a href="{{ note.pdf_url }}" target="_blank" rel="noopener noreferrer" class="pdf-indicator" title="PDF Document Attached">
+                                    <i class="fa-solid fa-file-pdf"></i> PDF
+                                </a>
+                            {% endif %}
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state-box">
+                <i class="fa-regular fa-file-lines empty-icon"></i>
+                <h3>No Notes Available Yet</h3>
+                <p>New study notes will appear here once published.</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Why LAK04 Feature Highlights -->
+<section class="section-padding features-section">
+    <div class="content-container">
+        <div class="features-box">
+            <div class="feature-item">
+                <div class="feature-icon"><i class="fa-solid fa-sitemap"></i></div>
+                <h4>Subject-Centric</h4>
+                <p>All notes are strictly organized by academic subject for structured revision.</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon"><i class="fa-solid fa-bolt"></i></div>
+                <h4>Instant Access</h4>
+                <p>Publicly readable anytime on any desktop, tablet, or phone without requiring student sign-up.</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon"><i class="fa-solid fa-file-pdf"></i></div>
+                <h4>PDF Materials</h4>
+                <p>Direct download and preview links for official lecture handouts and study PDFs.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

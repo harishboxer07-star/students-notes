@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}All Academic Subjects — LAK04{% endblock %}
+{% block meta_description %}Browse all academic subjects and revision notes available on the LAK04 learning platform.{% endblock %}
+
+{% block content %}
+<div class="page-header-banner">
+    <div class="content-container">
+        <div class="breadcrumbs">
+            <a href="{{ url_for('index') }}"><i class="fa-solid fa-house"></i> Home</a>
+            <i class="fa-solid fa-chevron-right separator"></i>
+            <span>Subjects</span>
+        </div>
+        <h1 class="page-title"><i class="fa-solid fa-layer-group text-accent"></i> Academic Subjects</h1>
+        <p class="page-subtitle">Select a subject below to explore all corresponding syllabus notes, tutorials, and PDF lecture materials.</p>
+    </div>
+</div>
+
+<section class="section-padding">
+    <div class="content-container">
+        <!-- Search & Filter Controls -->
+        <div class="filter-bar">
+            <form action="{{ url_for('subjects_list') }}" method="GET" class="filter-search-form">
+                <div class="filter-input-group">
+                    <i class="fa-solid fa-magnifying-glass filter-icon"></i>
+                    <input 
+                        type="text" 
+                        name="search" 
+                        value="{{ search }}" 
+                        placeholder="Search subjects by name or keywords..."
+                        id="subject-search-input"
+                    >
+                    {% if search %}
+                        <a href="{{ url_for('subjects_list') }}" class="clear-search-btn" title="Clear search">
+                            <i class="fa-solid fa-xmark"></i>
+                        </a>
+                    {% endif %}
+                </div>
+                <button type="submit" class="btn btn-primary">Filter Subjects</button>
+            </form>
+
+            <div class="catalog-summary">
+                <span>Showing <strong>{{ subjects|length }}</strong> {{ 'subject' if subjects|length == 1 else 'subjects' }}</span>
+            </div>
+        </div>
+
+        {% if subjects %}
+            <div class="subjects-grid">
+                {% for subject in subjects %}
+                    <div class="subject-card">
+                        <div class="subject-card-body">
+                            <div class="subject-icon-header">
+                                <div class="subject-icon-badge">
+                                    <i class="fa-solid fa-book"></i>
+                                </div>
+                                <span class="notes-count-badge">
+                                    <i class="fa-solid fa-file-lines"></i> {{ subject.notes_count }} {{ 'note' if subject.notes_count == 1 else 'notes' }}
+                                </span>
+                            </div>
+                            <h3 class="subject-name">
+                                <a href="{{ url_for('subject_detail', subject_id=subject.id) }}">{{ subject.name }}</a>
+                            </h3>
+                            <p class="subject-desc">
+                                {{ subject.description or 'Comprehensive syllabus notes and study guides for ' ~ subject.name ~ '.' }}
+                            </p>
+                        </div>
+                        <div class="subject-card-footer">
+                            <a href="{{ url_for('subject_detail', subject_id=subject.id) }}" class="subject-action-btn">
+                                <span>View Subject Notes</span>
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state-box">
+                <i class="fa-solid fa-folder-open empty-icon"></i>
+                <h3>No Matching Subjects Found</h3>
+                {% if search %}
+                    <p>No subjects matched your search term "<strong>{{ search }}</strong>".</p>
+                    <a href="{{ url_for('subjects_list') }}" class="btn btn-outline-primary"><i class="fa-solid fa-rotate-left"></i> View All Subjects</a>
+                {% else %}
+                    <p>There are no subjects registered in the database at the moment.</p>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit Subject' if is_edit else 'Add New Subject' }} — LAK04 Admin{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+    <!-- Admin Sidebar -->
+    <aside class="admin-sidebar" id="admin-sidebar">
+        <div class="sidebar-brand">
+            <span class="sidebar-brand-icon"><i class="fa-solid fa-gauge-high"></i></span>
+            <div class="sidebar-brand-info">
+                <span class="sidebar-title">Admin Console</span>
+                <span class="sidebar-user"><i class="fa-solid fa-circle text-success"></i> {{ admin_username }}</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="sidebar-section-title">Navigation</div>
+            <ul class="sidebar-menu">
+                <li class="sidebar-item">
+                    <a href="{{ url_for('admin_dashboard') }}" class="sidebar-link">
+                        <i class="fa-solid fa-chart-pie"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ url_for('manage_subjects') }}" class="sidebar-link active">
+                        <i class="fa-solid fa-layer-group"></i>
+                        <span>Manage Subjects</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ url_for('manage_notes') }}" class="sidebar-link">
+                        <i class="fa-solid fa-book-open"></i>
+                        <span>Manage Notes</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-section-title">Actions & Links</div>
+            <ul class="sidebar-menu">
+                <li class="sidebar-item">
+                    <a href="{{ url_for('index') }}" class="sidebar-link" target="_blank">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        <span>View Website</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ url_for('admin_logout') }}" class="sidebar-link text-danger">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Sign Out</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="admin-main-content">
+        <!-- Top Title Bar -->
+        <div class="admin-topbar">
+            <div>
+                <div class="breadcrumbs admin-breadcrumbs">
+                    <a href="{{ url_for('admin_dashboard') }}">Admin</a>
+                    <i class="fa-solid fa-chevron-right separator"></i>
+                    <a href="{{ url_for('manage_subjects') }}">Subjects</a>
+                    <i class="fa-solid fa-chevron-right separator"></i>
+                    <span>{{ 'Edit Subject' if is_edit else 'New Subject' }}</span>
+                </div>
+                <h1 class="admin-page-title">{{ 'Edit Subject' if is_edit else 'Create New Subject' }}</h1>
+                <p class="admin-page-subtitle">Configure the academic title and overview description for this subject module.</p>
+            </div>
+            <div>
+                <a href="{{ url_for('manage_subjects') }}" class="btn btn-secondary btn-sm">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Subjects
+                </a>
+            </div>
+        </div>
+
+        <!-- Form Card -->
+        <div class="admin-form-container">
+            <div class="admin-panel-card">
+                <div class="panel-card-header">
+                    <div>
+                        <h2 class="panel-card-title">
+                            <i class="fa-solid {{ 'fa-pen-to-square' if is_edit else 'fa-plus-circle' }} text-primary"></i>
+                            {{ 'Update Subject Details' if is_edit else 'Subject Information' }}
+                        </h2>
+                        <span class="panel-card-desc">All subjects are publicly viewable by visiting students.</span>
+                    </div>
+                </div>
+
+                <div class="panel-card-body">
+                    <form method="POST" action="" class="crud-form" id="subject-form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+                        <!-- Subject Name -->
+                        <div class="form-group">
+                            <label for="name" class="form-label required-label">
+                                <i class="fa-solid fa-heading"></i> Subject Name
+                            </label>
+                            <input 
+                                type="text" 
+                                name="name" 
+                                id="name" 
+                                class="form-control" 
+                                placeholder="e.g., Computer Networks, Discrete Mathematics, Cloud Computing" 
+                                value="{{ name or (subject.name if subject else '') }}" 
+                                required 
+                                autofocus
+                            >
+                            <small class="form-help-text">Enter a unique descriptive name for the subject course.</small>
+                        </div>
+
+                        <!-- Subject Description -->
+                        <div class="form-group">
+                            <label for="description" class="form-label">
+                                <i class="fa-solid fa-align-left"></i> Subject Description / Syllabus Summary
+                            </label>
+                            <textarea 
+                                name="description" 
+                                id="description" 
+                                class="form-control form-textarea" 
+                                rows="5" 
+                                placeholder="Briefly summarize the topics covered in this subject..."
+                            >{{ description or (subject.description if subject else '') }}</textarea>
+                            <small class="form-help-text">Visible to students on the home page and subjects catalog card.</small>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-actions-row">
+                            <button type="submit" class="btn btn-primary" id="save-subject-btn">
+                                <i class="fa-solid fa-check"></i> {{ 'Save Changes' if is_edit else 'Create Subject' }}
+                            </button>
+                            <a href="{{ url_for('manage_subjects') }}" class="btn btn-secondary">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

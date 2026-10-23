@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit Study Note' if is_edit else 'Publish New Note' }} — LAK04 Admin{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+    <!-- Admin Sidebar -->
+    <aside class="admin-sidebar" id="admin-sidebar">
+        <div class="sidebar-brand">
+            <span class="sidebar-brand-icon"><i class="fa-solid fa-gauge-high"></i></span>
+            <div class="sidebar-brand-info">
+                <span class="sidebar-title">Admin Console</span>
+                <span class="sidebar-user"><i class="fa-solid fa-circle text-success"></i> {{ admin_username }}</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="sidebar-section-title">Navigation</div>
+            <ul class="sidebar-menu">
+                <li class="sidebar-item">
+                    <a href="{{ url_for('admin_dashboard') }}" class="sidebar-link">
+                        <i class="fa-solid fa-chart-pie"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ url_for('manage_subjects') }}" class="sidebar-link">
+                        <i class="fa-solid fa-layer-group"></i>
+                        <span>Manage Subjects</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ url_for('manage_notes') }}" class="sidebar-link active">
+                        <i class="fa-solid fa-book-open"></i>
+                        <span>Manage Notes</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-section-title">Actions & Links</div>
+            <ul class="sidebar-menu">
+                <li class="sidebar-item">
+                    <a href="{{ url_for('index') }}" class="sidebar-link" target="_blank">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        <span>View Website</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ url_for('admin_logout') }}" class="sidebar-link text-danger">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Sign Out</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="admin-main-content">
+        <!-- Top Title Bar -->
+        <div class="admin-topbar">
+            <div>
+                <div class="breadcrumbs admin-breadcrumbs">
+                    <a href="{{ url_for('admin_dashboard') }}">Admin</a>
+                    <i class="fa-solid fa-chevron-right separator"></i>
+                    <a href="{{ url_for('manage_notes') }}">Notes</a>
+                    <i class="fa-solid fa-chevron-right separator"></i>
+                    <span>{{ 'Edit Note' if is_edit else 'New Note' }}</span>
+                </div>
+                <h1 class="admin-page-title">{{ 'Edit Study Note' if is_edit else 'Publish New Study Note' }}</h1>
+                <p class="admin-page-subtitle">Author comprehensive educational content, explanations, and link supplementary PDF references.</p>
+            </div>
+            <div>
+                <a href="{{ url_for('manage_notes') }}" class="btn btn-secondary btn-sm">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Notes
+                </a>
+            </div>
+        </div>
+
+        <!-- Form Card -->
+        <div class="admin-form-container">
+            <div class="admin-panel-card">
+                <div class="panel-card-header">
+                    <div>
+                        <h2 class="panel-card-title">
+                            <i class="fa-solid {{ 'fa-pen-to-square' if is_edit else 'fa-feather-pointed' }} text-primary"></i>
+                            {{ 'Update Note Details' if is_edit else 'Note Details & Content' }}
+                        </h2>
+                        <span class="panel-card-desc">Fill out the fields below. Content supports formatted headings and lists.</span>
+                    </div>
+                </div>
+
+                <div class="panel-card-body">
+                    <form method="POST" action="" class="crud-form" id="note-form" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+                        <!-- Title Field -->
+                        <div class="form-group">
+                            <label for="title" class="form-label required-label">
+                                <i class="fa-solid fa-heading"></i> Note Title
+                            </label>
+                            <input 
+                                type="text" 
+                                name="title" 
+                                id="title" 
+                                class="form-control" 
+                                placeholder="e.g. Asymptotic Complexity and Big-O Notation"
+                                value="{{ form_data.title or (note.title if note else '') }}" 
+                                required 
+                                autofocus
+                            >
+                            <small class="form-help-text">Choose a descriptive, student-friendly topic title.</small>
+                        </div>
+
+                        <!-- Subject Dropdown -->
+                        <div class="form-group">
+                            <label for="subject_id" class="form-label required-label">
+                                <i class="fa-solid fa-layer-group"></i> Subject Category
+                            </label>
+                            <select name="subject_id" id="subject_id" class="form-control" required>
+                                <option value="">-- Choose Academic Subject --</option>
+                                {% for sub in subjects %}
+                                    <option value="{{ sub.id }}" {% if (form_data.subject_id|string == sub.id|string) or (note and note.subject_id|string == sub.id|string) %}selected{% endif %}>
+                                        {{ sub.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-help-text">Associates this note with a subject via foreign key constraint.</small>
+                        </div>
+
+                        <!-- Short Description / Summary -->
+                        <div class="form-group">
+                            <label for="description" class="form-label">
+                                <i class="fa-solid fa-quote-left"></i> Summary / Short Description
+                            </label>
+                            <textarea 
+                                name="description" 
+                                id="description" 
+                                class="form-control form-textarea" 
+                                rows="3" 
+                                placeholder="A brief one or two sentence summary shown on note preview cards..."
+                            >{{ form_data.description or (note.description if note else '') }}</textarea>
+                            <small class="form-help-text">Displays in search previews and directory listings.</small>
+                        </div>
+
+
+
+                        <!-- Supplementary PDF Resource (File Upload OR URL/URN) -->
+                        <div class="form-group pdf-upload-card-box">
+                            <label class="form-label">
+                                <i class="fa-solid fa-file-pdf text-danger"></i> Supplementary PDF Resource (File Upload or Any URL / URN)
+                            </label>
+                            
+                            <div class="pdf-options-container">
+                                <!-- Option 1: Direct File Upload -->
+                                <div class="pdf-option-subcard">
+                                    <span class="subcard-title"><i class="fa-solid fa-cloud-arrow-up"></i> 1. Upload Local PDF File</span>
+                                    <input 
+                                        type="file" 
+                                        name="pdf_file" 
+                                        id="pdf_file" 
+                                        class="form-control" 
+                                        accept=".pdf,application/pdf"
+                                    >
+                                    <small class="form-help-text">Select a .pdf document from your computer to store on server.</small>
+                                </div>
+
+                                <div class="pdf-option-divider"><span>OR</span></div>
+
+                                <!-- Option 2: Any URL or URN -->
+                                <div class="pdf-option-subcard">
+                                    <span class="subcard-title"><i class="fa-solid fa-link"></i> 2. Provide Any URL or Resource URN</span>
+                                    <input 
+                                        type="text" 
+                                        name="pdf_url" 
+                                        id="pdf_url" 
+                                        class="form-control" 
+                                        placeholder="e.g. https://example.com/handout.pdf or urn:isbn:978-0131103627 or /static/uploads/..."
+                                        value="{{ form_data.pdf_url or (note.pdf_url if note else '') }}"
+                                    >
+                                    <small class="form-help-text">Enter any external web URL, relative path, or URN reference.</small>
+                                </div>
+                            </div>
+
+                            {% if note and note.pdf_url %}
+                                <div class="current-pdf-badge">
+                                    <i class="fa-solid fa-paperclip"></i> Currently attached: 
+                                    <a href="{{ note.pdf_url }}" target="_blank" rel="noopener noreferrer"><strong>{{ note.pdf_url }}</strong></a>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-actions-row">
+                            <button type="submit" class="btn btn-primary" id="save-note-btn">
+                                <i class="fa-solid fa-check"></i> {{ 'Update Note' if is_edit else 'Publish Note' }}
+                            </button>
+                            <a href="{{ url_for('manage_notes') }}" class="btn btn-secondary">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Subjects — LAK04 Admin{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+    <!-- Admin Sidebar -->
+    <aside class="admin-sidebar" id="admin-sidebar">
+        <div class="sidebar-brand">
+            <span class="sidebar-brand-icon"><i class="fa-solid fa-gauge-high"></i></span>
+            <div class="sidebar-brand-info">
+                <span class="sidebar-title">Admin Console</span>
+                <span class="sidebar-user"><i class="fa-solid fa-circle text-success"></i> {{ admin_username }}</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="sidebar-section-title">Navigation</div>
+            <ul class="sidebar-menu">
+                <li class="sidebar-item">
+                    <a href="{{ url_for('admin_dashboard') }}" class="sidebar-link">
+                        <i class="fa-solid fa-chart-pie"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ url_for('manage_subjects') }}" class="sidebar-link active">
+                        <i class="fa-solid fa-layer-group"></i>
+                        <span>Manage Subjects</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ url_for('manage_notes') }}" class="sidebar-link">
+                        <i class="fa-solid fa-book-open"></i>
+                        <span>Manage Notes</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-section-title">Actions & Links</div>
+            <ul class="sidebar-menu">
+                <li class="sidebar-item">
+                    <a href="{{ url_for('index') }}" class="sidebar-link" target="_blank">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        <span>View Website</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ url_for('admin_logout') }}" class="sidebar-link text-danger">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Sign Out</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="admin-main-content">
+        <!-- Top Title Bar -->
+        <div class="admin-topbar">
+            <div>
+                <div class="breadcrumbs admin-breadcrumbs">
+                    <a href="{{ url_for('admin_dashboard') }}">Admin</a>
+                    <i class="fa-solid fa-chevron-right separator"></i>
+                    <span>Subjects</span>
+                </div>
+                <h1 class="admin-page-title">Manage Subjects</h1>
+                <p class="admin-page-subtitle">Add, edit, view, or remove academic subject classifications.</p>
+            </div>
+            <div>
+                <a href="{{ url_for('subject_create') }}" class="btn btn-primary">
+                    <i class="fa-solid fa-plus"></i> Add New Subject
+                </a>
+            </div>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="admin-toolbar-card">
+            <form action="{{ url_for('manage_subjects') }}" method="GET" class="admin-search-form">
+                <div class="filter-input-group">
+                    <i class="fa-solid fa-magnifying-glass filter-icon"></i>
+                    <input 
+                        type="text" 
+                        name="search" 
+                        value="{{ search }}" 
+                        placeholder="Search subjects by name or description..."
+                    >
+                    {% if search %}
+                        <a href="{{ url_for('manage_subjects') }}" class="clear-search-btn" title="Clear search">
+                            <i class="fa-solid fa-xmark"></i>
+                        </a>
+                    {% endif %}
+                </div>
+                <button type="submit" class="btn btn-secondary btn-sm">Search</button>
+            </form>
+            <div class="toolbar-stats">
+                <span>Total Subjects: <strong>{{ subjects|length }}</strong></span>
+            </div>
+        </div>
+
+        <!-- Subjects Table Card -->
+        <div class="admin-panel-card">
+            <div class="panel-card-body table-responsive">
+                {% if subjects %}
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">ID</th>
+                                <th>Subject Name</th>
+                                <th>Description</th>
+                                <th style="width: 130px;">Notes Count</th>
+                                <th style="width: 140px;">Created Date</th>
+                                <th class="text-right" style="width: 170px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for subject in subjects %}
+                                <tr>
+                                    <td><span class="table-id">#{{ subject.id }}</span></td>
+                                    <td>
+                                        <a href="{{ url_for('subject_detail', subject_id=subject.id) }}" target="_blank" class="table-item-title" title="View public notes">
+                                            <strong>{{ subject.name }}</strong>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <p class="table-description-text">
+                                            {{ subject.description or '<span class="text-muted">No description provided</span>'|safe }}
+                                        </p>
+                                    </td>
+                                    <td>
+                                        <span class="badge-tag notes-badge">
+                                            <i class="fa-solid fa-file-lines"></i> {{ subject.notes_count }} {{ 'note' if subject.notes_count == 1 else 'notes' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="table-date">{{ subject.created_at|format_date }}</span>
+                                    </td>
+                                    <td class="text-right">
+                                        <div class="table-actions">
+                                            <a href="{{ url_for('subject_detail', subject_id=subject.id) }}" class="btn-icon" title="View Subject on Website" target="_blank">
+                                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                            </a>
+                                            <a href="{{ url_for('subject_edit', subject_id=subject.id) }}" class="btn-icon text-primary" title="Edit Subject">
+                                                <i class="fa-solid fa-pen-to-square"></i>
+                                            </a>
+                                            <button 
+                                                type="button" 
+                                                class="btn-icon text-danger btn-delete-trigger" 
+                                                title="Delete Subject"
+                                                data-id="{{ subject.id }}"
+                                                data-name="{{ subject.name }}"
+                                                data-notes="{{ subject.notes_count }}"
+                                                data-url="{{ url_for('subject_delete', subject_id=subject.id) }}"
+                                                onclick="openDeleteSubjectModal(this)"
+                                            >
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="table-empty-notice">
+                        <i class="fa-solid fa-folder-open"></i>
+                        <h3>No Subjects Found</h3>
+                        {% if search %}
+                            <p>No subjects matching "<strong>{{ search }}</strong>".</p>
+                            <a href="{{ url_for('manage_subjects') }}" class="btn btn-secondary btn-sm">Show All Subjects</a>
+                        {% else %}
+                            <p>Get started by creating your first academic subject.</p>
+                            <a href="{{ url_for('subject_create') }}" class="btn btn-primary btn-sm">Add Subject</a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Dialog: Delete Subject Confirmation -->
+<div class="modal-backdrop" id="delete-subject-modal" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title-danger">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>Confirm Subject Deletion</span>
+                </div>
+                <button type="button" class="modal-close" onclick="closeDeleteModal('delete-subject-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the subject <strong id="modal-subject-name"></strong>?</p>
+                <div id="modal-subject-warning" class="alert alert-danger" style="display: none;">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span><strong>Integrity Protection:</strong> This subject currently contains <span id="modal-notes-count"></span> note(s). You must delete or reassign its notes before this subject can be deleted.</span>
+                </div>
+                <p class="modal-subtext">This action cannot be undone once executed.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeDeleteModal('delete-subject-modal')">Cancel</button>
+                <form id="delete-subject-form" method="POST" action="">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <button type="submit" class="btn btn-danger" id="modal-delete-confirm-btn">
+                        <i class="fa-solid fa-trash-can"></i> Delete Permanently
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function openDeleteSubjectModal(button) {
+    const subjectName = button.getAttribute('data-name');
+    const notesCount = parseInt(button.getAttribute('data-notes') || '0', 10);
+    const deleteUrl = button.getAttribute('data-url');
+
+    document.getElementById('modal-subject-name').innerText = `"${subjectName}"`;
+    document.getElementById('delete-subject-form').action = deleteUrl;
+
+    const warningBox = document.getElementById('modal-subject-warning');
+    const confirmBtn = document.getElementById('modal-delete-confirm-btn');
+
+    if (notesCount > 0) {
+        document.getElementById('modal-notes-count').innerText = notesCount;
+        warningBox.style.display = 'flex';
+        confirmBtn.disabled = true;
+        confirmBtn.title = "Delete notes first before deleting this subject";
+    } else {
+        warningBox.style.display = 'none';
+        confirmBtn.disabled = false;
+        confirmBtn.title = "";
+    }
+
+    document.getElementById('delete-subject-modal').style.display = 'flex';
+}
+
+function closeDeleteModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+</script>
+{% endblock %}

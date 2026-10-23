@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Administrator Login — LAK04{% endblock %}
+{% block meta_description %}Secure administrator authentication portal for LAK04 Student Notes System.{% endblock %}
+
+{% block content %}
+<div class="auth-page-container">
+    <div class="auth-card animate-fade-in">
+        <div class="auth-header">
+            <div class="auth-icon-badge">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h1 class="auth-title">Admin Portal</h1>
+            <p class="auth-subtitle">Sign in to manage subjects, upload notes, and control educational resources.</p>
+        </div>
+
+        <form action="{{ url_for('admin_login') }}" method="POST" class="auth-form" id="admin-login-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="next" value="{{ next }}">
+
+            <!-- Username Field -->
+            <div class="form-group">
+                <label for="username" class="form-label">
+                    <i class="fa-solid fa-user"></i> Administrator Username
+                </label>
+                <div class="form-input-wrapper">
+                    <input 
+                        type="text" 
+                        name="username" 
+                        id="username" 
+                        class="form-control" 
+                        placeholder="Enter admin username"
+                        value="{{ username or '' }}"
+                        required 
+                        autofocus
+                    >
+                </div>
+            </div>
+
+            <!-- Password Field with Show/Hide -->
+            <div class="form-group">
+                <label for="password" class="form-label">
+                    <i class="fa-solid fa-key"></i> Administrator Password
+                </label>
+                <div class="form-input-wrapper password-wrapper">
+                    <input 
+                        type="password" 
+                        name="password" 
+                        id="password" 
+                        class="form-control" 
+                        placeholder="Enter password"
+                        required
+                    >
+                    <button 
+                        type="button" 
+                        class="password-toggle-btn" 
+                        id="password-toggle" 
+                        aria-label="Toggle password visibility"
+                        title="Show/Hide Password"
+                    >
+                        <i class="fa-solid fa-eye" id="password-toggle-icon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary btn-block btn-auth-submit" id="login-submit-btn">
+                <i class="fa-solid fa-right-to-bracket"></i> Sign In to Dashboard
+            </button>
+        </form>
+
+        <div class="auth-footer-help">
+            <div class="security-notice">
+                <i class="fa-solid fa-lock"></i>
+                <span>Protected with secure session hashing & CSRF tokens</span>
+            </div>
+            <p class="help-text">
+                Need to create or reset the administrator account? Run <code>python init_admin.py</code> in your project terminal.
+            </p>
+            <div class="back-home-link">
+                <a href="{{ url_for('index') }}"><i class="fa-solid fa-arrow-left"></i> Return to Public Website</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
